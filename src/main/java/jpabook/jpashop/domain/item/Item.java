@@ -6,9 +6,12 @@ import lombok.Setter;
 
 import jpabook.jpashop.domain.Category;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
+
 import java.util.ArrayList;
 import java.util.List;
 
+//@BatchSize(size = 100)
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")

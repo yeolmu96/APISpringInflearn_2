@@ -92,11 +92,21 @@ public class OrderRepository {
         return query.getResultList();
     }
 
-    public List<Order> finAllWithMemberDelivery() {
+    public List<Order> findAllWithMemberDelivery() {
         return em.createQuery("select o from Order o" +
                         " join fetch o.member m" +
                         " join fetch o.delivery"
                 , Order.class).getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery("select o from Order o" //+
+//                        " join fetch o.member m" +
+//                        " join fetch o.delivery"
+                , Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     //Order와 관련된 모든 데이터(Member, Delivery, OrderItems, Item)를 단 1쿼리로 즉시 로딩해서 N+1 문제를 방지

@@ -48,7 +48,7 @@ public class OrderSimpleApiController {
 
         //Order 객체를 건드리지 않으면서 원하는 값을 가져옴
         //재사용성이 높음
-        List<Order> orders = orderRepository.finAllWithMemberDelivery();
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
         List<SimpleOrderDto> reuslt = orders.stream()
                 .map(o -> new SimpleOrderDto(o))
