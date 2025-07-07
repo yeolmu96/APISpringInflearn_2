@@ -28,11 +28,16 @@ public class OrderApiController {
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
 
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> ordersV5() {
+        return orderQueryRepository.findAllByDto_optimization();
+    }
+
     //ToOne 먼저 조회
     //ToMany 별도 처리(row 수 증가)
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4(){
-        return orderQueryRepository.findOrderQueryDtos();
+        return orderQueryRepository.findOrderQueryDto();
     }
 
     //fetch join + yaml 파일 hibernate 설정으로 페이징 처리
