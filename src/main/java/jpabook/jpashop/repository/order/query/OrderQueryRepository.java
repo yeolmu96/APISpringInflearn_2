@@ -14,6 +14,18 @@ public class OrderQueryRepository {
 
     private final EntityManager em;
 
+    //쿼리 1번만 실행
+    public List<OrderFlatDto> findAllByDto_flat() {
+        return em.createQuery(
+                        "select new jpabook.jpashop.repository.order.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)" +
+                                "from Order o " +
+                                "join o.member m " +
+                                "join o.delivery d " +
+                                "join o.orderItems oi " +
+                                "join oi.item i", OrderFlatDto.class)
+                .getResultList();
+    }
+
     //쿼리 실행 2번
     public List<OrderQueryDto> findAllByDto_optimization() {
         List<OrderQueryDto> result = findOrders();
@@ -23,7 +35,7 @@ public class OrderQueryRepository {
         Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(orderIds);
 
         result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
-        
+
         return result;
     }
 
@@ -31,12 +43,12 @@ public class OrderQueryRepository {
     //쿼리 한 번 보내서 메모리에 맵으로 가져옴
     private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
         List<OrderItemQueryDto> orderItems = em.createQuery(
-                "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count) " +
-                   "from OrderItem oi " +
-                   "join oi.item i " +
-                   "where oi.order.id in :orderIds", OrderItemQueryDto.class)
-                   .setParameter("orderIds", orderIds)
-                   .getResultList();
+                        "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count) " +
+                                "from OrderItem oi " +
+                                "join oi.item i " +
+                                "where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
 
         //최적화
         Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
@@ -48,8 +60,8 @@ public class OrderQueryRepository {
 
     private static List<Long> toOrderIds(List<OrderQueryDto> result) {
         List<Long> orderIds = result.stream()
-                        .map(o -> o.getOrderId())
-                        .collect(Collectors.toList());
+                .map(o -> o.getOrderId())
+                .collect(Collectors.toList());
         return orderIds;
     }
 
