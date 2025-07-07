@@ -34,6 +34,9 @@ public class OrderApiController {
     public List<OrderQueryDto> ordersV6() {
         List<OrderFlatDto> flats =  orderQueryRepository.findAllByDto_flat();
 
+        //주문(Order)에 대한 데이터를 한 번의 쿼리로 모두 가져와서 OrderFlatDto라는 DTO 객체에 담아 반환
+        //“평탄화”란, 주문 1건에 여러 주문상품이 있으면 주문정보가 중복으로 반복되며 한 행씩 쭉 나오는 것
+        //페이징 불가능
         return flats.stream()
                 .collect(groupingBy(o -> new OrderQueryDto(o.getOrderId(),
                                 o.getName(), o.getOrderDate(), o.getOrderStatus(), o.getAddress()),
