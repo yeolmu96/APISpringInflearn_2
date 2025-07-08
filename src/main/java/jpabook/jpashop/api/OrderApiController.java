@@ -6,6 +6,7 @@ import jpabook.jpashop.repository.order.query.OrderFlatDto;
 import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
+import jpabook.jpashop.service.query.OrderQueryService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class OrderApiController {
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
 
+    //플랫 데이터 최적화 : JOIN 결과 조회 후 원하는 모양으로 직접 변환
     @GetMapping("/api/v6/orders")
     public List<OrderQueryDto> ordersV6() {
         List<OrderFlatDto> flats =  orderQueryRepository.findAllByDto_flat();
@@ -49,19 +51,23 @@ public class OrderApiController {
             .collect(toList());
     }
 
+    //1:N관계는 IN절 활용으로 메모리에 미리 조회해서 최적화
     @GetMapping("/api/v5/orders")
     public List<OrderQueryDto> ordersV5() {
         return orderQueryRepository.findAllByDto_optimization();
     }
 
+    //DTO 직접 조회
     //ToOne 먼저 조회
-    //ToMany 별도 처리(row 수 증가)
+    //ToMany(컬렉션) 별도 처리(row 수 증가하기 때문에)
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4(){
         return orderQueryRepository.findOrderQueryDto();
     }
 
-    //fetch join + yaml 파일 hibernate 설정으로 페이징 처리
+    //컬렉션 페이징 한계 돌파하기
+    //XToOne 관계는 fetch join으로 쿼리 수 최적화
+    //컬렉션은 지연 로딩 유지하고 yaml 파일 hibernate 설정(fetch_size)으로 최적화, 페이징 처리
     @GetMapping("/api/v3.1/orders")
     public List<OrderDto> odersV3_page(
             @RequestParam(value = "offset", defaultValue = "0") int offset,
@@ -76,18 +82,24 @@ public class OrderApiController {
         return result;
     }
 
-    //fetch join 사용
+    private final OrderQueryService orderQueryService;
+
+    //fetch join으로 쿼리 수 최적화
     @GetMapping("/api/v3/orders")
-    public List<OrderDto> rodersV3() {
-        List<Order> orders = orderRepository.findAllWithItem();
+    public List<jpabook.jpashop.service.query.OrderDto> odersV3() {
 
-        List<OrderDto> result = orders.stream()
-                .map(o -> new OrderDto(o))
-                .collect(Collectors.toList());
+        return orderQueryService.ordersV3();
 
-        return result;
+//        List<Order> orders = orderRepository.findAllWithItem();
+//
+//        List<OrderDto> result = orders.stream()
+//                .map(o -> new OrderDto(o))
+//                .collect(Collectors.toList());
+//
+//        return result;
     }
-
+    
+    //객체 조회 후 DTO 변환
     @GetMapping("/api/v2/orders")
     public List<OrderDto> ordersV2() {
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
@@ -137,6 +149,7 @@ public class OrderApiController {
         }
     }
 
+    //객체 조회 후 그대로 반환
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());

@@ -57,6 +57,7 @@ public class OrderSimpleApiController {
         return reuslt;
     }
 
+    //객체 조회 후 DTO로 변환
     //Order 쿼리 결과 2개
     //N + 1 : 1번째 쿼리 + 회원 N(2)번 + 배송 N(2)번 -> 총 쿼리 5개
     @GetMapping("/api/v2/simple-orders")
@@ -87,6 +88,7 @@ public class OrderSimpleApiController {
         }
     }
 
+    //객체를 조회해서 그대로 반환
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1(){
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
